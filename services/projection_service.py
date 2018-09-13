@@ -8,8 +8,12 @@ class ProjectionService:
         df = pd.read_csv(data_path, index_col = 0)
         base = os.path.basename(data_path)
         fname = os.path.splitext(base)[0]
+        output_files = []
         for n_components in dims:
             print("Training T-SNE for {}D...".format(n_components))
             X_embedded = TSNE(n_components=n_components, method='exact').fit_transform(df)
             X_embedded_df = pd.DataFrame(X_embedded, index=df.index)
-            X_embedded_df.to_csv(output+'/'+fname+'_TSNE_{}D.csv'.format(n_components))
+            file_name = output+'/'+fname+'_TSNE_{}D.csv'.format(n_components)
+            X_embedded_df.to_csv(file_name)
+            output_files.append(file_name)
+        return output_files
