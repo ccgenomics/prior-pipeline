@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 from unittest.mock import call
+from sklearn.neural_network import MLPClassifier
 import numpy as np
 import hyperopt
 
@@ -15,7 +16,7 @@ class TestClassifierService(unittest.TestCase):
         mock_fmin.assert_called_once()
 
     def test_interpreter(self):
-        from sklearn.neural_network import MLPClassifier
+
         params = {
             'model': MLPClassifier,
             'params': {
@@ -33,7 +34,7 @@ class TestClassifierService(unittest.TestCase):
 
 
     def test_evaluate(self):
-        X = np.array([[1,2,3,4]]*10)
+        X = np.array([[1,2,3,4]]*5 + [[2,4,6,8]]*5 )
         Y = np.array([True, True, True, False, False, False, False, False, False, False])
 
         class Model:
@@ -43,3 +44,43 @@ class TestClassifierService(unittest.TestCase):
         model = Model()
         metric = cs.evaluate(model, X, Y)
         self.assertAlmostEqual(metric, 0.14285, places=4)
+
+    @mock.patch('services.classifier_service.ClassifierService.load_data')
+    def test_objective(self, mock_load_data):
+        params = {
+            'model': MLPClassifier,
+            'params': {
+                'activation': 'relu',
+                'hidden_layer_sizes': (4,3,2),
+                'random_state':1
+            },
+            'data_path':'./tests/data/A.csv',
+            'targets_path':'./tests/data/targets.csv',
+        }
+        mock_load_data.return_value = (
+            [[1,2,3]]*5 + [[3,4,5]]*5 , [[1]]*4+[[0]]*6
+        )*2
+        cv_metric = cs.objective(params)
+        calls= [
+            call(   data_path='./tests/data/A.csv',
+                    targets_path='./tests/data/targets.csv',
+                    train_set = 0.8,
+                    random_state=i
+            ) for i in range(1, 6)
+            ]
+        mock_load_data.assert_has_calls(calls)
+        self.assertEqual(cv_metric, .5)
+
+
+    def test_load_data(self):
+        X_train, Y_train, X_test, Y_test = cs.load_data(
+            data_path='./tests/data/A.csv',
+            targets_path='./tests/data/targets.csv',
+            train_set = 0.5,
+            random_state=1
+        )
+
+        self.assertEqual(str(X_train), str(np.genfromtxt('./tests/data/exp_train_A.csv', delimiter=',', dtype=int)))
+        self.assertEqual(str(Y_train), str(np.genfromtxt('./tests/data/exp_train_targets.csv', delimiter=',', dtype=bool)))
+        self.assertEqual(str(X_test), str(np.genfromtxt('./tests/data/exp_test_A.csv', delimiter=',', dtype=int)))
+        self.assertEqual(str(Y_test), str(np.genfromtxt('./tests/data/exp_test_targets.csv', delimiter=',', dtype=bool)))
