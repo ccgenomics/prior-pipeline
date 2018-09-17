@@ -18,7 +18,7 @@ class TestClassifierService(unittest.TestCase):
     def test_interpreter(self):
 
         params = {
-            'model': MLPClassifier,
+            'name': MLPClassifier,
             'params': {
                 'activation': 'relu',
                 'hidden_layer_sizes': (4,3,2)
@@ -28,6 +28,16 @@ class TestClassifierService(unittest.TestCase):
             activation='relu',
             hidden_layer_sizes=(4,3,2)
         )
+
+        model = cs.interpreter(params)
+        self.assertEqual(str(expected_model), str(model))
+
+    def test_interpreter_no_params(self):
+
+        params = {
+            'name': MLPClassifier
+        }
+        expected_model = MLPClassifier()
 
         model = cs.interpreter(params)
         self.assertEqual(str(expected_model), str(model))
@@ -47,16 +57,17 @@ class TestClassifierService(unittest.TestCase):
 
     @mock.patch('services.classifier_service.ClassifierService.load_data')
     def test_objective(self, mock_load_data):
-        params = {
-            'model': MLPClassifier,
+        params = ({
+            'name': MLPClassifier,
             'params': {
                 'activation': 'relu',
                 'hidden_layer_sizes': (4,3,2),
                 'random_state':1
+                }
             },
-            'data_path':'./tests/data/A.csv',
-            'targets_path':'./tests/data/targets.csv',
-        }
+            './tests/data/A.csv',
+            './tests/data/targets.csv')
+
         mock_load_data.return_value = (
             [[1,2,3]]*5 + [[3,4,5]]*5 , [[1]]*4+[[0]]*6
         )*2

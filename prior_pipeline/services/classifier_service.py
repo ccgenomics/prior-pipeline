@@ -16,12 +16,15 @@ class ClassifierService:
 
     @classmethod
     def objective(cls, args):
+        print(args)
         metrics = []
         for seed in range(1, cls.cv_fold+1):
-            model = cls.interpreter(args)
+            model = cls.interpreter(args[0])
+            data_path = args[1]
+            targets_path = args[2]
             X_train, Y_train, X_test, Y_test = cls.load_data(
-                data_path=args['data_path'],
-                targets_path=args['targets_path'],
+                data_path=data_path,
+                targets_path=targets_path,
                 train_set = cls.train_set,
                 random_state=seed
             )
@@ -42,9 +45,9 @@ class ClassifierService:
         )
 
     @classmethod
-    def interpreter(cls, params):
-        model = params['model'](**params['params'])
-        return model
+    def interpreter(cls, model):
+        instance = model['name'](**model['params'] if 'params' in model else {})
+        return instance
 
     @classmethod
     def evaluate(cls, model, X, Y):
