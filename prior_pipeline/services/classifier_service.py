@@ -4,7 +4,7 @@ import hyperopt as hpo
 import numpy as np
 from sklearn import metrics
 from hyperopt import Trials
-import hyperopt
+from hyperopt import mongoexp
 
 class ClassifierService:
 
@@ -39,7 +39,7 @@ class ClassifierService:
     @classmethod
     def fit(cls, space=dflt, max_evals=100, mongo=None):
         if mongo:
-            trials = hyperopt.mongoexp.MongoTrials(mongo['url'], exp_key=mongo['exp'])
+            trials = mongoexp.MongoTrials(mongo['url'], exp_key=mongo['exp'])
         else:
             trials = Trials()
         best = hpo.fmin(
