@@ -32,16 +32,17 @@ class ClassifierService:
             metric = cls.evaluate(model, X_test, Y_test)
             metrics.append(metric)
         metrics_mean = np.array(metrics).mean()
+        print(metrics_mean)
         return 1 - metrics_mean
 
 
     @classmethod
-    def fit(cls, X, Y, space=dflt):
+    def fit(cls, X, Y, space=dflt, max_evals=100):
         best = hpo.fmin(
             cls.objective,
             space,
             algo=hpo.tpe.suggest,
-            max_evals=100
+            max_evals=max_evals
         )
 
     @classmethod
@@ -53,19 +54,17 @@ class ClassifierService:
     def evaluate(cls, model, X, Y):
         probs = model.predict_proba(X)[:,1]
         fpr, tpr, thresholds = metrics.roc_curve(Y, probs)
-        print(fpr, tpr, thresholds)
         return metrics.auc(fpr, tpr, reorder=False)
 
     @classmethod
     def load_data(cls, data_path, targets_path, train_set=train_set, random_state=1 ):
-        data = pd.read_csv(data_path)
-        targets = pd.read_csv(targets_path).iloc[:,-1]
-        # print(targets.iloc[:,-1])
+        data = pd.read_csv(data_path, index_col=0)
+        targets = pd.read_csv(targets_path, index_col=0).iloc[:,-1]
         full = pd.concat([data, targets], axis=1, join='inner')
         train_size = int(len(full)*train_set)
         shuffled = full.sample(frac=1, random_state=random_state)
-        X_train = shuffled.iloc[:train_size,:-1].as_matrix()
-        Y_train = shuffled.iloc[:train_size, -1].as_matrix()
-        X_test = shuffled.iloc[train_size:, :-1].as_matrix()
-        Y_test = shuffled.iloc[train_size:, -1].as_matrix()
+        X_train = shuffled.iloc[:train_size,:-1].values
+        Y_train = shuffled.iloc[:train_size, -1].values
+        X_test = shuffled.iloc[train_size:, :-1].values
+        Y_test = shuffled.iloc[train_size:, -1].values
         return X_train, Y_train, X_test, Y_test
