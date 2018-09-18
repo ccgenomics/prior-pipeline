@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 from unittest.mock import call
 from sklearn.neural_network import MLPClassifier
+from hyperopt.mongoexp import MongoTrials
 import numpy as np
 import hyperopt
 
@@ -10,13 +11,23 @@ from services.classifier_service import ClassifierService as cs
 class TestClassifierService(unittest.TestCase):
     @mock.patch('hyperopt.fmin')
     def test_fit(self, mock_fmin):
-        X = np.genfromtxt('./tests/data/A.csv', delimiter=',')
-        Y = np.genfromtxt('./tests/data/targets.csv', delimiter=',')
-        cs.fit(X, Y)
+        cs.fit()
         mock_fmin.assert_called_once()
 
-    def test_interpreter(self):
+    @mock.patch('hyperopt.fmin')
+    @mock.patch('hyperopt.mongoexp.MongoTrials')
+    def test_fit_mongo(self,mock_MongoTrials, mock_fmin):
+        mongo = {
+            'url': 'mongo://localhost:1234/foo_db/jobs',
+            'exp': 'my_experience'
+        }
+        mock_MongoTrials.return_value = 'random_hash_4b9u4y5h3r9u'
+        cs.fit(mongo=mongo)
+        mock_MongoTrials.assert_called_once_with('mongo://localhost:1234/foo_db/jobs', exp_key='my_experience')
+        args, kwargs = mock_fmin.call_args_list[0]
+        self.assertEqual(kwargs['trials'],  'random_hash_4b9u4y5h3r9u')
 
+    def test_interpreter(self):
         params = {
             'name': MLPClassifier,
             'params': {

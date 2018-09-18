@@ -3,7 +3,8 @@ import pandas as pd
 import hyperopt as hpo
 import numpy as np
 from sklearn import metrics
-
+from hyperopt import Trials
+import hyperopt
 
 class ClassifierService:
 
@@ -35,14 +36,18 @@ class ClassifierService:
         print(metrics_mean)
         return 1 - metrics_mean
 
-
     @classmethod
-    def fit(cls, X, Y, space=dflt, max_evals=100):
+    def fit(cls, space=dflt, max_evals=100, mongo=None):
+        if mongo:
+            trials = hyperopt.mongoexp.MongoTrials(mongo['url'], exp_key=mongo['exp'])
+        else:
+            trials = Trials()
         best = hpo.fmin(
             cls.objective,
             space,
             algo=hpo.tpe.suggest,
-            max_evals=max_evals
+            max_evals=max_evals,
+            trials=trials
         )
 
     @classmethod
