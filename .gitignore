@@ -6,6 +6,8 @@ data/*
 # C extensions
 *.so
 credentials.csv
+logfile.txt
+
 
 # Distribution / packaging
 .Python
