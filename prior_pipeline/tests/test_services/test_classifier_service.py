@@ -131,7 +131,7 @@ class TestClassifierService(unittest.TestCase):
     def test_get_data_not_found_locally(self, mock_read_csv, mock_download_file):
         data = cs.get_data('./tests/data/B.csv')
         mock_download_file.assert_called_once_with(
-            's3://ccg-machine-learning/',
+            'ccg-machine-learning',
             'prior-data/B.csv',
             './tests/data/B.csv'
         )
