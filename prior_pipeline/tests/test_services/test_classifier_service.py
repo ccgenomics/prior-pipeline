@@ -5,8 +5,10 @@ from sklearn.neural_network import MLPClassifier
 from hyperopt.mongoexp import MongoTrials
 import numpy as np
 import hyperopt
+import pandas as pd
 
 from services.classifier_service import ClassifierService as cs
+from services.download_service import DownloadService as ds
 
 class TestClassifierService(unittest.TestCase):
     @mock.patch('hyperopt.fmin')
@@ -101,8 +103,35 @@ class TestClassifierService(unittest.TestCase):
             train_set = 0.5,
             random_state=1
         )
-
         self.assertEqual(str(X_train), str(np.genfromtxt('./tests/data/exp_train_A.csv', delimiter=',', dtype=int)))
         self.assertEqual(str(Y_train), str(np.genfromtxt('./tests/data/exp_train_targets.csv', delimiter=',', dtype=bool)))
         self.assertEqual(str(X_test), str(np.genfromtxt('./tests/data/exp_test_A.csv', delimiter=',', dtype=int)))
         self.assertEqual(str(Y_test), str(np.genfromtxt('./tests/data/exp_test_targets.csv', delimiter=',', dtype=bool)))
+
+    @mock.patch('services.classifier_service.ClassifierService.get_data')
+    def test_load_data_calls_get_data(self, mock_get_data):
+        data_path = './tests/data/A.csv'
+        targets_path = './tests/data/targets.csv'
+        mock_get_data.return_value = pd.read_csv(data_path, index_col=0)
+        X_train, Y_train, X_test, Y_test = cs.load_data(
+            data_path=data_path,
+            targets_path=targets_path,
+            train_set = 0.5,
+            random_state=1
+        )
+        mock_get_data.assert_called_once_with(data_path)
+
+    def test_get_data(self):
+        data = cs.get_data('./tests/data/A.csv')
+        exp_data = pd.read_csv('./tests/data/A.csv', index_col=0)
+        self.assertEquals(str(data), str(exp_data))
+
+    @mock.patch('services.download_service.DownloadService.download_file')
+    @mock.patch('pandas.read_csv')
+    def test_get_data_not_found_locally(self, mock_read_csv, mock_download_file):
+        data = cs.get_data('./tests/data/B.csv')
+        mock_download_file.assert_called_once_with(
+            's3://ccg-machine-learning/',
+            'prior-data/B.csv',
+            './tests/data/B.csv'
+        )

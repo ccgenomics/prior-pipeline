@@ -5,6 +5,9 @@ import numpy as np
 from sklearn import metrics
 from hyperopt import Trials
 from hyperopt import mongoexp
+import os
+from services.download_service import DownloadService as ds
+
 
 class ClassifierService:
 
@@ -12,6 +15,8 @@ class ClassifierService:
             ('data_path', 'path_to_data'),
             ('targets_path', 'path_to_targets'))
 
+    bucket_name = 's3://ccg-machine-learning/'
+    key_prefix = 'prior-data/'
     cv_fold = 5
     train_set = 0.8
 
@@ -49,6 +54,7 @@ class ClassifierService:
             max_evals=max_evals,
             trials=trials
         )
+        return best
 
     @classmethod
     def interpreter(cls, model):
@@ -62,8 +68,18 @@ class ClassifierService:
         return metrics.auc(fpr, tpr, reorder=False)
 
     @classmethod
-    def load_data(cls, data_path, targets_path, train_set=train_set, random_state=1 ):
+    def get_data(cls, data_path):
+        if not os.path.isfile(data_path):
+            base = os.path.basename(data_path)
+            key = cls.key_prefix+base
+            ds.download_file(cls.bucket_name, key, data_path)
         data = pd.read_csv(data_path, index_col=0)
+        return data
+
+    @classmethod
+    def load_data(cls, data_path, targets_path, train_set=train_set, random_state=1 ):
+        # data = pd.read_csv(data_path, index_col=0)
+        data = cls.get_data(data_path)
         targets = pd.read_csv(targets_path, index_col=0).iloc[:,-1]
         full = pd.concat([data, targets], axis=1, join='inner')
         train_size = int(len(full)*train_set)
