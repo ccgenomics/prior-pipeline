@@ -119,7 +119,11 @@ class TestClassifierService(unittest.TestCase):
             train_set = 0.5,
             random_state=1
         )
-        mock_get_data.assert_called_once_with(data_path)
+        calls = [
+            call(data_path),
+            call(targets_path),
+        ]
+        mock_get_data.assert_has_calls(calls)
 
     def test_get_data(self):
         data = cs.get_data('./tests/data/A.csv')
