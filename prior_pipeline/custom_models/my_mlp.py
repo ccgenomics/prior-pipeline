@@ -17,6 +17,9 @@ class FunnelMLPClassifier(MLPClassifier):
 
     @classmethod
     def set_layers(cls, input_layer=200,num_hidden_layer=2,output_layer=100):
+        input_layer = int(input_layer)
+        num_hidden_layer = int(num_hidden_layer)
+        output_layer = int(output_layer)
         layers = []
         num_layer = num_hidden_layer + 2
         scale = (input_layer - output_layer) / (num_layer-1)
