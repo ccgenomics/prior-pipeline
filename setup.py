@@ -13,7 +13,8 @@ setup(name='prior_pipeline',
     install_requires = ['hyperopt==0.1',
         'pandas==0.23.3',
         'sklearn==0.0',
-        'numpy==1.14.5'
+        'numpy==1.14.5',
+        'boto3==1.5.24'
     ],
     include_package_data = True,
     zip_safe = False)
