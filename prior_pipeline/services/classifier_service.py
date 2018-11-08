@@ -82,6 +82,7 @@ class ClassifierService:
         # data = pd.read_csv(data_path, index_col=0)
         data = cls.get_data(data_path)
         all_targets = cls.get_data(targets_path)
+        import pdb; pdb.set_trace()
         targets = all_targets.iloc[:,-1]
         full = pd.concat([data, targets], axis=1, join='inner')
         train_size = int(len(full)*train_set)
