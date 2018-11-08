@@ -48,3 +48,30 @@ space = (hp.choice('model',
 
 best = pp.classifier.fit(space=space, max_evals=1000, mongo=mongo)
 ```
+
+## Expected Data Form
+
+The data and the targets are expected in two separate files with index.
+(For classifier fit, target should be the class integer)
+
+Such as:
+
+    #data.csv
+
+    id,col_1, col_2
+    0,456, 678
+    1,546, 878    
+    2,456, 686    
+    3,3656, 658    
+    4,4357, 683    
+
+
+
+    #tagets.csv
+
+    id,target
+    0,1
+    1,1
+    2,1
+    3,0
+    4,0

@@ -140,15 +140,6 @@ class TestClassifierService(unittest.TestCase):
         mock_get_data.assert_has_calls(calls)
 
 
-    def test_load_data(self):
-        X_train, Y_train, X_test, Y_test = cs.load_data(
-            data_path='./tests/data/A.csv',
-            targets_path='./tests/data/single_target.csv',
-            train_set = 0.5,
-            random_state=1
-        )
-
-
     def test_get_data(self):
         data = cs.get_data('./tests/data/A.csv')
         exp_data = pd.read_csv('./tests/data/A.csv', index_col=0)
