@@ -6,6 +6,8 @@ from hyperopt.mongoexp import MongoTrials
 import numpy as np
 import hyperopt
 import pandas as pd
+import hyperopt as hpo
+from hyperopt import Trials
 
 from services.classifier_service import ClassifierService as cs
 from services.download_service import DownloadService as ds
@@ -13,8 +15,20 @@ from services.download_service import DownloadService as ds
 class TestClassifierService(unittest.TestCase):
     @mock.patch('hyperopt.fmin')
     def test_fit(self, mock_fmin):
+        trials=Trials()
         cs.fit()
-        mock_fmin.assert_called_once()
+        # import pdb; pdb.set_trace()
+        mock_fmin.assert_called_once_with(
+            cs.objective,
+            (
+                ('model', 'test'),
+                ('data_path', 'path_to_data'),
+                ('targets_path', 'path_to_targets')
+            ),
+            max_evals=100,
+            algo=hpo.tpe.suggest,
+            trials=None
+        )
 
     @mock.patch('hyperopt.fmin')
     @mock.patch('hyperopt.mongoexp.MongoTrials')

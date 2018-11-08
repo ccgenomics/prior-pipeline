@@ -46,7 +46,7 @@ class ClassifierService:
         if mongo:
             trials = mongoexp.MongoTrials(mongo['url'], exp_key=mongo['exp'])
         else:
-            trials = Trials()
+            trials = None
         best = hpo.fmin(
             cls.objective,
             space,
