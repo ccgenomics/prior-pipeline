@@ -75,3 +75,26 @@ Such as:
     2,1
     3,0
     4,0
+
+## Expected Model Interface
+
+In order to use a custom model, the following methods need to be implemented:
+
+```python
+    class MyCustomModel:
+
+      def fit(X, Y):
+        pass
+
+      def predict_proba(X):
+        """
+        Returns one class probabilities.
+
+        Parameters:
+        X (list): Input data of size N x X
+
+        Returns:
+        list: The one class probabilities vector of size N x 2 (eg: [[0.7,0.3],...])
+
+        """
+```
