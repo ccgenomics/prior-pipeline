@@ -22,7 +22,6 @@ class ClassifierService:
 
     @classmethod
     def objective(cls, args):
-        print(args)
         metrics = []
         for seed in range(1, cls.cv_fold+1):
             model = cls.interpreter(args[0])
